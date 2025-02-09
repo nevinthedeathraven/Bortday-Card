@@ -1,0 +1,343 @@
+from flask import Flask, render_template_string, request, redirect, session
+import secrets
+
+app = Flask(__name__)
+app.secret_key = secrets.token_hex(16)
+
+initial_template = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', 'Times New Roman', serif;
+            text-align: center;
+            background: linear-gradient(45deg, #004d4d, #008080);
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .form {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 90%;
+        }
+        input {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid #90EE90;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .btn {
+            background-color: #90EE90;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 15px;
+        }
+        .btn:hover {
+            background-color: #32CD32;
+        }
+    </style>
+</head>
+<body>
+    <div class="form">
+        <h2>✨ Welcome to a Special Surprise! ✨</h2>
+        <form action="/check-initial" method="post">
+            <input type="text" name="name" placeholder="Your name" required><br>
+            <input type="text" name="color" placeholder="Favorite color" required><br>
+            <button class="btn" type="submit">✨ Enter ✨</button>
+        </form>
+    </div>
+</body>
+</html>
+"""
+
+verification_template = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verify Identity</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', 'Times New Roman', serif;
+            text-align: center;
+            background: linear-gradient(45deg, #004d4d, #008080);
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .form {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 90%;
+        }
+        input {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid #90EE90;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .btn {
+            background-color: #90EE90;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 15px;
+        }
+        .btn:hover {
+            background-color: #32CD32;
+        }
+    </style>
+</head>
+<body>
+    <div class="form">
+        <h2>✨ Final Verification! ✨</h2>
+        <form action="/verify" method="post">
+            <input type="text" name="sport" placeholder="What's your sport?" required><br>
+            <button class="btn" type="submit">✨ Verify Me! ✨</button>
+        </form>
+    </div>
+</body>
+</html>
+"""
+
+intruder_template = """
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive;
+            text-align: center;
+            background: linear-gradient(45deg, #004d4d, #008080);
+            padding: 50px;
+            color: #663399;
+        }
+        h1 {
+            animation: wiggle 1s infinite;
+        }
+        @keyframes wiggle {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+            100% { transform: rotate(0deg); }
+        }
+        .back-btn {
+            background: #90EE90;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚨 INTRUDER ALERT! 🚨</h1>
+    <h2>👀 Heyyyy you! This is Ysai's special surprise!</h2>
+    <p style="font-size: 24px;">🎭 Nice try being sneaky though! 🎭</p>
+    <p style="font-size: 20px;">⚠️ Please exit immediately or face tickles! ⚠️</p>
+    <div style="font-size: 40px;">
+        🏃‍♀️💨 *whoosh*
+    </div>
+    <a href="/" class="back-btn">Try Again</a>
+</body>
+</html>
+"""
+
+html_template = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Birthday Surprise for Ysai!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', 'Times New Roman', serif;
+            text-align: center;
+            background: linear-gradient(45deg, #004d4d, #008080);
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+        h1, h2 {
+            color: #228B22;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            animation: bounce 1s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .message, .form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .btn {
+            background-color: #90EE90;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background-color: #32CD32;
+        }
+        .hidden {
+            display: none;
+        }
+        input {
+            padding: 8px;
+            margin: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="message">
+        <h1>🎉 Happy Birthday Ysai! 🎉</h1>
+        <p>🎂✨🎂✨🎂✨</p>
+
+        <div id="birthdayMessage" class="hidden">
+            <p>HAPPY HAPPY BORTDAY YSAIIII!!! 🎂🎀</p>
+            <p>Stay happy, strong, healthy at higit sa lahat stay 🔥pretty🔥 yowww</p>
+            <p>Good luck sa friendship gameee (Ang sipag mo namang magtraining boss)</p>
+            <p>MBTC & God Bless! (≧▽≦)</p>
+        </div>
+
+        <div id="secretMessage" class="hidden" style="text-align: center;">
+            <button id="initialButton" class="btn" style="background-color: #ff69b4;">Click for a secret message! 🤫</button>
+            <div id="confirmButtons" class="hidden">
+                <p>Are you suuuure? 👀</p>
+                <button id="confirmButton1" class="btn" style="background-color: #ff69b4;">Yes! (｡♡‿♡｡)</button>
+            </div>
+            <div id="confirmButtons2" class="hidden">
+                <p>Really really sure? 🙈</p>
+                <button id="confirmButton2" class="btn" style="background-color: #ff69b4;">Super sure! ⭐</button>
+            </div>
+            <div id="confirmButtons3" class="hidden">
+                <p>Last chance to back out! 🤭</p>
+                <button id="confirmButton3" class="btn" style="background-color: #ff69b4;">Just tell me already! 🎀</button>
+            </div>
+            <div id="finalMessage" class="hidden">
+                <p style="color: #ff69b4; font-style: italic; margin: 20px;">
+                    Wala langs HAHAHA hoping to be friends [sofer shy lang ng eabab na dis] (⁠´⁠∩⁠｡⁠•⁠ ⁠ᵕ⁠ ⁠•⁠｡⁠∩⁠`⁠)
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function startCelebration() {
+            let count = 3;
+            const countDiv = document.createElement('div');
+            countDiv.style.fontSize = '48px';
+            document.body.appendChild(countDiv);
+
+            const interval = setInterval(() => {
+                if (count > 0) {
+                    countDiv.textContent = `✨ ${count} ✨`;
+                    count--;
+                } else {
+                    clearInterval(interval);
+                    countDiv.remove();
+                    document.getElementById('birthdayMessage').classList.remove('hidden');
+                    const videoDiv = document.createElement('div');
+                    videoDiv.innerHTML = '<iframe width="270" height="480" src="https://www.youtube.com/embed/jqYxyd1iSNk?autoplay=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+                    document.body.appendChild(videoDiv);
+                    setTimeout(() => {
+                        document.getElementById('secretMessage').classList.remove('hidden');
+                    }, 5000);
+                }
+            }, 1000);
+        }
+
+        document.getElementById('initialButton').addEventListener('click', function() {
+            this.classList.add('hidden');
+            document.getElementById('confirmButtons').classList.remove('hidden');
+        });
+
+        document.getElementById('confirmButton1').addEventListener('click', function() {
+            document.getElementById('confirmButtons').classList.add('hidden');
+            document.getElementById('confirmButtons2').classList.remove('hidden');
+        });
+
+        document.getElementById('confirmButton2').addEventListener('click', function() {
+            document.getElementById('confirmButtons2').classList.add('hidden');
+            document.getElementById('confirmButtons3').classList.remove('hidden');
+        });
+
+        document.getElementById('confirmButton3').addEventListener('click', function() {
+            document.getElementById('confirmButtons3').classList.add('hidden');
+            document.getElementById('finalMessage').classList.remove('hidden');
+        });
+
+        window.onload = startCelebration;
+    </script>
+</body>
+</html>
+"""
+
+@app.route('/')
+def index():
+    session.clear()
+    return render_template_string(initial_template)
+
+@app.route('/check-initial', methods=['POST'])
+def check_initial():
+    name = request.form.get('name')
+    if name.lower() != 'ysai':
+        return render_template_string(intruder_template)
+    session['passed_initial'] = True
+    return render_template_string(verification_template)
+
+@app.route('/verify', methods=['POST'])
+def verify():
+    if not session.get('passed_initial'):
+        return redirect('/')
+
+    sport = request.form.get('sport')
+
+    if sport.lower().strip() == 'volleyball':
+        session['verified'] = True
+        return render_template_string(html_template)
+    return render_template_string(intruder_template)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=3000)
