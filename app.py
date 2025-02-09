@@ -6,7 +6,7 @@ app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
 
 # Set the PORT dynamically for Render deployment
-PORT = int(os.environ.get("PORT", 3000))
+PORT = 3000  # Directly setting it to 3000
 
 initial_template = """
 <!DOCTYPE html>
@@ -18,7 +18,7 @@ initial_template = """
         body {
             font-family: 'Montserrat', 'Times New Roman', serif;
             text-align: center;
-            background: linear-gradient(45deg, #3D0075, #FFD700);
+            background: linear-gradient(45deg, #3E1F47, #9C528B);
             padding: 20px;
             margin: 0;
             min-height: 100vh;
@@ -27,10 +27,10 @@ initial_template = """
             align-items: center;
         }
         .form {
-            background-color: #FFF3B0;
+            background-color: white;
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
             max-width: 400px;
             width: 90%;
         }
@@ -38,12 +38,12 @@ initial_template = """
             width: 80%;
             padding: 10px;
             margin: 10px 0;
-            border: 2px solid #5E0080;
+            border: 2px solid #A27B5C;
             border-radius: 5px;
             font-size: 16px;
         }
         .btn {
-            background-color: #5E0080;
+            background-color: #A27B5C;
             color: white;
             padding: 12px 25px;
             border: none;
@@ -53,7 +53,7 @@ initial_template = """
             margin-top: 15px;
         }
         .btn:hover {
-            background-color: #A55EEA;
+            background-color: #693D3D;
         }
     </style>
 </head>
