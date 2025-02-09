@@ -6,7 +6,7 @@ app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
 
 # Set the PORT dynamically for Render deployment
-PORT = 3000  # Directly setting it to 3000
+PORT = int(os.environ.get("PORT", 3000))
 
 initial_template = """
 <!DOCTYPE html>
@@ -18,32 +18,34 @@ initial_template = """
         body {
             font-family: 'Montserrat', 'Times New Roman', serif;
             text-align: center;
-            background: linear-gradient(45deg, #3E1F47, #9C528B);
+            background: linear-gradient(45deg, #3e2f5b, #8e44ad);
             padding: 20px;
             margin: 0;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            color: white;
         }
         .form {
-            background-color: white;
+            background-color: rgba(255, 255, 255, 0.9);
             padding: 30px;
             border-radius: 15px;
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
             max-width: 400px;
             width: 90%;
+            color: black;
         }
         input {
             width: 80%;
             padding: 10px;
             margin: 10px 0;
-            border: 2px solid #A27B5C;
+            border: 2px solid #90EE90;
             border-radius: 5px;
             font-size: 16px;
         }
         .btn {
-            background-color: #A27B5C;
+            background-color: #90EE90;
             color: white;
             padding: 12px 25px;
             border: none;
@@ -53,7 +55,7 @@ initial_template = """
             margin-top: 15px;
         }
         .btn:hover {
-            background-color: #693D3D;
+            background-color: #32CD32;
         }
     </style>
 </head>
@@ -94,4 +96,4 @@ def verify():
     return "<h1>🚨 Intruder Alert! 🚨</h1><p>Only Ysai can enter! Go back.</p>"
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=PORT)
+    app.run(host='0.0.0.0', port=PORT, debug=True)
