@@ -98,3 +98,20 @@ def verify():
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 3000))  # Get PORT from environment, default to 3000
     app.run(host='0.0.0.0', port=port)
+
+from flask import Flask, render_template_string, request, redirect, session
+import secrets
+import os
+
+app = Flask(__name__)
+app.secret_key = secrets.token_hex(16)
+
+# Render provides a PORT environment variable, use it
+PORT = int(os.environ.get("PORT", 10000))  # Default to 10000 if not set
+
+@app.route("/")
+def home():
+    return "🚀 Your Flask app is running on Render!"
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=PORT)
