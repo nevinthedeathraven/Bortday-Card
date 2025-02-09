@@ -2,7 +2,7 @@ from flask import Flask, render_template_string, request, redirect, session
 import secrets
 import os
 
-app = Flask(Bortday_Card.py)
+app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
 
 # Set the PORT dynamically for Render deployment
